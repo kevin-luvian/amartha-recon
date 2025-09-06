@@ -1,0 +1,8 @@
+id,type,amount,date
+not_included_1,CREDIT,1,2024-12-30 10:00:05
+no_match_1,CREDIT,1,2025-10-05 10:00:00
+dbs_match_id_1,DEBIT,4,2025-01-01 15:04:05
+test_dbs_match_amount_1,DEBIT,10,2025-01-01 15:04:05
+test_bca_match_amount_1,CREDIT,4,2025-01-02 10:00:00
+test_bca_match_date_1,CREDIT,10,2025-01-05 10:00:00
+test_dbs_match_date_2,DEBIT,10,2025-01-07 10:00:00

@@ -1,0 +1,4 @@
+source,id,type,amount,date,remark
+dbs,dbs_error_negative_1,DEBIT,-10.00,2025-01-01,negative amount provided
+dbs,dbs_match_date_2,DEBIT,12.00,2025-01-08,No matching internal transaction found
+amartha,no_match_1,CREDIT,1.00,2025-10-05,No matching external transaction found
