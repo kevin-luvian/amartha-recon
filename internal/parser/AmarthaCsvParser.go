@@ -1,8 +1,9 @@
 package parser
 
 import (
-	"project/internal/model"
 	"strconv"
+
+	"github.com/kevin-luvian/amartha-recon/internal/model"
 
 	"time"
 

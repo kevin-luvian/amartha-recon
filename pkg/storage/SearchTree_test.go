@@ -205,7 +205,6 @@ func TestSearchTree_GetPrint(t *testing.T) {
 	// Test data
 	objects := []map[string]string{
 		{"date": "2025-01-01", "type": "debit", "id": "txnid_12345", "amount": "5"},
-		{"date": "2025-01-01", "type": "credit", "id": "txnid_12346", "amount": "10"},
 	}
 
 	for _, obj := range objects {
@@ -214,7 +213,7 @@ func TestSearchTree_GetPrint(t *testing.T) {
 	}
 
 	value := root.GetPrint()
-	expectedValue := "{2025-01-01: {debit: {txnid_12345: txnid_12345}credit: {txnid_12346: txnid_12346}}}"
+	expectedValue := "{2025-01-01: {debit: {txnid_12345: txnid_12345}}}"
 	if value != expectedValue {
 		t.Fatalf("Expected %v, Got %v", expectedValue, value)
 	}

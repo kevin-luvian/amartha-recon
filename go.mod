@@ -1,4 +1,4 @@
-module project
+module github.com/kevin-luvian/amartha-recon
 
 go 1.25.1
 

@@ -3,17 +3,18 @@ package main
 import (
 	"context"
 	"fmt"
-	"project/internal/parser"
-	"project/internal/services"
-	"project/pkg/ingester"
-	"project/pkg/pipeline"
+
+	"github.com/kevin-luvian/amartha-recon/internal/parser"
+	"github.com/kevin-luvian/amartha-recon/internal/services"
+	"github.com/kevin-luvian/amartha-recon/pkg/ingester"
+	"github.com/kevin-luvian/amartha-recon/pkg/pipeline"
 )
 
 var FILES = map[string]string{
-	"amartha": "/home/kevinluvianh/Documents/amartha-go/bin/amartha_sample.csv",
-	"bca":     "/home/kevinluvianh/Documents/amartha-go/bin/bca_sample.csv",
-	"dbs":     "/home/kevinluvianh/Documents/amartha-go/bin/dbs_sample.csv",
-	"output":  "/home/kevinluvianh/Documents/amartha-go/bin/out_sample.csv",
+	"amartha": "/home/kevinluvianh/Documents/amartha-recon/bin/amartha_sample.csv",
+	"bca":     "/home/kevinluvianh/Documents/amartha-recon/bin/bca_sample.csv",
+	"dbs":     "/home/kevinluvianh/Documents/amartha-recon/bin/dbs_sample.csv",
+	"output":  "/home/kevinluvianh/Documents/amartha-recon/bin/out_sample.csv",
 }
 
 func main() {

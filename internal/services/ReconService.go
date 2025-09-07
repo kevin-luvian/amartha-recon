@@ -4,12 +4,13 @@ import (
 	"context"
 	"fmt"
 	"math"
-	"project/internal/model"
-	"project/internal/parser"
-	"project/pkg/ingester"
-	"project/pkg/pipeline"
-	"project/pkg/storage"
 	"time"
+
+	"github.com/kevin-luvian/amartha-recon/internal/model"
+	"github.com/kevin-luvian/amartha-recon/internal/parser"
+	"github.com/kevin-luvian/amartha-recon/pkg/ingester"
+	"github.com/kevin-luvian/amartha-recon/pkg/pipeline"
+	"github.com/kevin-luvian/amartha-recon/pkg/storage"
 )
 
 type ReconSummary struct {

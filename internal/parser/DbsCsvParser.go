@@ -2,8 +2,9 @@ package parser
 
 import (
 	"fmt"
-	"project/internal/model"
 	"strconv"
+
+	"github.com/kevin-luvian/amartha-recon/internal/model"
 
 	"time"
 
