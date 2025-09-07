@@ -25,19 +25,19 @@ func NewBcaParser() *BcaParser {
 }
 
 func (a *BcaParser) Parse(record map[string]string) model.Transaction {
-	var dbsCsv DbsCsv
+	var bcaCsv BcaCsv
 	var parseErr error
 
-	if err := mapstructure.Decode(record, &dbsCsv); err != nil {
+	if err := mapstructure.Decode(record, &bcaCsv); err != nil {
 		parseErr = err
 	}
 
-	t, err := time.Parse(time.DateOnly, dbsCsv.Date)
+	t, err := time.Parse(time.DateOnly, bcaCsv.Date)
 	if err != nil {
 		parseErr = err
 	}
 
-	amountf64, err := strconv.ParseFloat(dbsCsv.Amount, 64)
+	amountf64, err := strconv.ParseFloat(bcaCsv.Amount, 64)
 	if err != nil {
 		parseErr = err
 	}
@@ -49,7 +49,7 @@ func (a *BcaParser) Parse(record map[string]string) model.Transaction {
 
 	return model.Transaction{
 		Source:     "bca",
-		Id:         dbsCsv.Id,
+		Id:         bcaCsv.Id,
 		Type:       txnType,
 		Amount:     math.Abs(amountf64),
 		Date:       t.Format("2006-01-02"),
