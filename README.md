@@ -18,18 +18,29 @@ amartha-recon/
 ├── cmd/
 │   └── main.go                 # Application entry point
 ├── internal/
-│   ├── model/                  # Transaction data model
+│   ├── model/                  
+│   │   └── Transaction.go      # Transaction data model
 │   ├── parser/                 # Source CSV parsers
+│   │   ├── AmarthaCsvParser.go
+│   │   ├── BcaCsvParser.go
+│   │   ├── DbsCsvParser.go
+│   │   └── Types.go
 │   └── services/               # Core logic layer
+│       └── ReconService.go
 ├── pkg/
 │   ├── ingester/               # CSV file processing
-│   │   └── CsvIngester.go      
+│   │   ├── CsvIngester.go
+│   │   └── Types.go
 │   ├── pipeline/               # Data pipeline utilities
-│   │   └── Pipeline.go         
+│   │   ├── Pipeline.go
 │   └── storage/                # Bespoke table implementation
-│       ├── HashTable.go        
-│       └── SearchTree.go
+│       ├── HashTable.go
+│       ├── SearchTree.go
+│       └── Types.go
 ├── bin/                        # Sample data
+│   ├── amartha_sample.csv
+│   ├── bca_sample.csv
+│   └── dbs_sample.csv
 └── Makefile                    # Build and test commands
 ```
 
