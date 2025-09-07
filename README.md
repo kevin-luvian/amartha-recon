@@ -123,12 +123,12 @@ The application generates:
 Example console output:
 ```
 ====== Reconciliation Summary ======
-Total Matched Transactions: 5
+Total Matched Transactions: 8
 Total Mismatched Transactions: 3
 Total Mismatches by Source:
   - amartha: 2 mismatches
   - dbs: 1 mismatches
-Total Discrepancy Amount: 13.00
+Total Discrepancy Amount: 15.00
 ====================================
 ```
 
@@ -191,6 +191,7 @@ The reconciliation system uses a custom HashTable that combines a hash map with 
       txn_2: 2025-01-01|CREDIT|txn_2
     6.00:
       txn_3: 2025-01-01|CREDIT|txn_3
+      txn_4: 2025-01-01|CREDIT|txn_4
 ```
 
 **Table:**
@@ -198,6 +199,7 @@ The reconciliation system uses a custom HashTable that combines a hash map with 
 2025-01-01|DEBIT|txn_1: &{ID: txn_1, Amount: 5.00, ...}
 2025-01-01|CREDIT|txn_2: &{ID: txn_2, Amount: 5.00, ...}
 2025-01-01|CREDIT|txn_3: &{ID: txn_3, Amount: 6.00, ...}
+2025-01-01|CREDIT|txn_4: &{ID: txn_4, Amount: 6.00, ...}
 ```
 
 ### Key Operations
