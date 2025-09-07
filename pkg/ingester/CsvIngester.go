@@ -88,7 +88,7 @@ func (c *CsvIngester) Write(ctx context.Context, filepath string, header []strin
 	}
 
 	if err := writer.Write(header); err != nil {
-		panic(err)
+		return err
 	}
 
 	for {

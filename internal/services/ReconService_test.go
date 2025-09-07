@@ -20,13 +20,13 @@ func (t *TestReconService_MockParser) Parse(record map[string]string) model.Tran
 }
 
 func TestReconService_NewReconService(t *testing.T) {
-	newService := NewReconService(NewReconServiceOpts{})
+	newService, _ := NewReconService(NewReconServiceOpts{})
 
 	if len(newService.FilterDateRange) != 0 {
 		t.Fatalf("Expected 0, got %d", len(newService.FilterDateRange))
 	}
 
-	newService = NewReconService(NewReconServiceOpts{
+	newService, _ = NewReconService(NewReconServiceOpts{
 		FilterDateRange: []string{"2025-01-01", "2025-01-10"},
 	})
 
@@ -281,13 +281,13 @@ func TestReconService_Reconcile(t *testing.T) {
 	}}
 
 	for _, testCase := range testCases {
-		newService := NewReconService(NewReconServiceOpts{
+		newService, _ := NewReconService(NewReconServiceOpts{
 			Ctx: ctx,
 		})
 		newService.internalSource = "internal"
 
 		inChan := testCase.Args()
-		outChan := newService.Reconcile(inChan)
+		outChan, _ := newService.Reconcile(inChan)
 
 		outputTransactions := []ReconTransaction{}
 		for t := range outChan {
@@ -376,7 +376,7 @@ func TestReconService_PassThroughSummary(t *testing.T) {
 	}}
 
 	for _, testCase := range testCases {
-		newService := NewReconService(NewReconServiceOpts{Ctx: ctx})
+		newService, _ := NewReconService(NewReconServiceOpts{Ctx: ctx})
 		summary := NewReconSummary()
 
 		transactions := testCase.Args
@@ -415,12 +415,12 @@ func TestReconService_ReadInternalCsv(t *testing.T) {
 	}
 	defer os.Remove(filePath)
 
-	newService := NewReconService(NewReconServiceOpts{
+	newService, _ := NewReconService(NewReconServiceOpts{
 		Ctx:         ctx,
 		CsvIngester: ingester.NewCsvIngester(),
 	})
 
-	txnChan := newService.ReadInternalCsv(ReconCsvDetail{
+	txnChan, _ := newService.ReadInternalCsv(ReconCsvDetail{
 		Source:      "test",
 		CsvFilepath: filePath,
 		Parser:      &TestReconService_MockParser{},
@@ -448,12 +448,12 @@ func TestReconService_ReadExternalCsv(t *testing.T) {
 	}
 	defer os.Remove(filePath)
 
-	newService := NewReconService(NewReconServiceOpts{
+	newService, _ := NewReconService(NewReconServiceOpts{
 		Ctx:         ctx,
 		CsvIngester: ingester.NewCsvIngester(),
 	})
 
-	txnChan := newService.ReadExternalCsv(ReconCsvDetail{
+	txnChan, _ := newService.ReadExternalCsv(ReconCsvDetail{
 		Source:      "test",
 		CsvFilepath: filePath,
 		Parser:      &TestReconService_MockParser{},

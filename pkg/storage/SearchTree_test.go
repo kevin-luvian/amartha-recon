@@ -140,9 +140,15 @@ func TestSearchTree_Delete(t *testing.T) {
 	}
 
 	// Delete invalid key
-	isDeleted := root.Delete([]string{})
+	isDeleted, _ := root.Delete([]string{})
 	if isDeleted {
 		t.Fatalf("Expected false, got %v", isDeleted)
+	}
+
+	// Delete non-leaf node
+	_, err := root.Delete([]string{"2025-01-01"})
+	if err == nil {
+		t.Fatalf("Expected error, got nil")
 	}
 }
 

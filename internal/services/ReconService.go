@@ -69,7 +69,7 @@ type NewReconServiceOpts struct {
 	FilterDateRange []string
 }
 
-func NewReconService(opts NewReconServiceOpts) *ReconService {
+func NewReconService(opts NewReconServiceOpts) (*ReconService, error) {
 	service := &ReconService{
 		Ctx:             opts.Ctx,
 		CsvIngester:     opts.CsvIngester,
@@ -81,27 +81,31 @@ func NewReconService(opts NewReconServiceOpts) *ReconService {
 	if len(opts.FilterDateRange) == 2 {
 		startDate, err := time.Parse(time.DateOnly, opts.FilterDateRange[0])
 		if err != nil {
-			panic(err)
+			return service, err
 		}
 
 		endDate, err := time.Parse(time.DateOnly, opts.FilterDateRange[1])
 		if err != nil {
-			panic(err)
+			return service, err
 		}
 
 		service.filterDateRangeEpoch = []int64{startDate.UnixMilli(), endDate.UnixMilli()}
 	}
 
-	return service
+	return service, nil
 }
 
-func (r *ReconService) ReadInternalCsv(detail ReconCsvDetail) <-chan model.Transaction {
-	r.internalSource = detail.Source
+func (r *ReconService) ReadInternalCsv(detail ReconCsvDetail) (<-chan model.Transaction, error) {
 	outputChan := make(chan model.Transaction, 10)
+
+	if r.internalSource != "" {
+		return outputChan, fmt.Errorf("only one internal csv source expected")
+	}
+	r.internalSource = detail.Source
 
 	readChan, err := r.CsvIngester.Read(r.Ctx, detail.CsvFilepath)
 	if err != nil {
-		panic(err)
+		return outputChan, err
 	}
 
 	pipeline.GetTransformerChans(
@@ -111,16 +115,16 @@ func (r *ReconService) ReadInternalCsv(detail ReconCsvDetail) <-chan model.Trans
 		detail.Parser.Parse,
 	)
 
-	return outputChan
+	return outputChan, nil
 }
 
-func (r *ReconService) ReadExternalCsv(detail ReconCsvDetail) <-chan model.Transaction {
+func (r *ReconService) ReadExternalCsv(detail ReconCsvDetail) (<-chan model.Transaction, error) {
 	r.externalSources = append(r.externalSources, detail.Source)
 	outputChan := make(chan model.Transaction, 10)
 
 	readChan, err := r.CsvIngester.Read(r.Ctx, detail.CsvFilepath)
 	if err != nil {
-		panic(err)
+		return outputChan, err
 	}
 
 	pipeline.GetTransformerChans(
@@ -130,15 +134,15 @@ func (r *ReconService) ReadExternalCsv(detail ReconCsvDetail) <-chan model.Trans
 		detail.Parser.Parse,
 	)
 
-	return outputChan
+	return outputChan, err
 }
 
-func (r *ReconService) Reconcile(transactionChan <-chan model.Transaction) <-chan ReconTransaction {
-	if r.internalSource == "" {
-		panic("Internal source not set")
-	}
-
+func (r *ReconService) Reconcile(transactionChan <-chan model.Transaction) (<-chan ReconTransaction, error) {
 	outChan := make(chan ReconTransaction, 10)
+
+	if r.internalSource == "" {
+		return outChan, fmt.Errorf("Internal source not set")
+	}
 
 	go func() {
 		defer close(outChan)
@@ -211,7 +215,7 @@ func (r *ReconService) Reconcile(transactionChan <-chan model.Transaction) <-cha
 		}
 	}()
 
-	return outChan
+	return outChan, nil
 }
 
 func (r *ReconService) processInternalMatching(transaction model.Transaction) (ReconTransaction, bool) {
@@ -281,13 +285,13 @@ func (r *ReconService) FilterMismatched(reconTransactionChan <-chan ReconTransac
 	})
 }
 
-func (r *ReconService) WriteToCsv(filepath string, reconTransactionChan <-chan ReconTransaction) {
+func (r *ReconService) WriteToCsv(filepath string, reconTransactionChan <-chan ReconTransaction) error {
 	recordChan := pipeline.TransformChan(reconTransactionChan, func(t ReconTransaction) (map[string]string, bool) {
 		return t.ToMap(), true
 	})
 
 	csvHeader := []string{"source", "id", "type", "amount", "date", "remark"}
-	r.CsvIngester.Write(r.Ctx, filepath, csvHeader, recordChan)
+	return r.CsvIngester.Write(r.Ctx, filepath, csvHeader, recordChan)
 }
 
 func (r *ReconService) FilterByDate(record model.Transaction) (model.Transaction, bool) {

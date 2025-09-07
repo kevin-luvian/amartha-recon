@@ -1,5 +1,7 @@
 package storage
 
+import "fmt"
+
 // Lookup table for searching keys, assume no duplicated transaction id / paths are unique
 //
 // Flow:
@@ -80,14 +82,14 @@ func (s *SearchTree[T]) Put(keys []string, value T) {
 	s.Children[keys[0]].Put(keys[1:], value)
 }
 
-func (s *SearchTree[T]) Delete(keys []string) bool {
+func (s *SearchTree[T]) Delete(keys []string) (bool, error) {
 	if len(keys) == 0 {
-		return false
+		return false, nil
 	}
 
 	childNode := s.Children[keys[0]]
 	if childNode == nil {
-		return false
+		return false, nil
 	}
 
 	if len(keys) == 1 {
@@ -95,20 +97,24 @@ func (s *SearchTree[T]) Delete(keys []string) bool {
 
 		if childNode.Value == "" {
 			// Fatal trying to delete non-leaf node edge case
-			panic("Trying to delete non-leaf node")
+			return false, fmt.Errorf("trying to delete non-leaf node")
 		}
 
 		delete(s.Children, keys[0])
-		return len(s.Children) == 0
+		return len(s.Children) == 0, nil
 	}
 
-	isDeletedAndEmpty := s.Children[keys[0]].Delete(keys[1:])
+	isDeletedAndEmpty, err := s.Children[keys[0]].Delete(keys[1:])
+	if err != nil {
+		return false, err
+	}
+
 	if isDeletedAndEmpty {
 		delete(s.Children, keys[0])
-		return len(s.Children) == 0
+		return len(s.Children) == 0, nil
 	}
 
-	return false
+	return false, nil
 }
 
 func (s *SearchTree[T]) GetPrint() string {

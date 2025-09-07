@@ -22,34 +22,55 @@ func main() {
 	defer cancel()
 
 	reconSummary := services.NewReconSummary()
-	reconService := services.NewReconService(services.NewReconServiceOpts{
+	reconService, err := services.NewReconService(services.NewReconServiceOpts{
 		Ctx:             ctx,
 		CsvIngester:     ingester.NewCsvIngester(),
 		FilterDateRange: []string{"2025-01-01", "2026-01-01"},
 	})
+	if err != nil {
+		panic(err)
+	}
 
-	internalTransactionChan := reconService.ReadInternalCsv(services.ReconCsvDetail{
+	internalTransactionChan, err := reconService.ReadInternalCsv(services.ReconCsvDetail{
 		Source:      "amartha",
 		CsvFilepath: FILES["amartha"],
 		Parser:      parser.NewAmarthaParser(),
 	})
-	dbsTransactionChan := reconService.ReadExternalCsv(services.ReconCsvDetail{
+	if err != nil {
+		panic(err)
+	}
+
+	dbsTransactionChan, err := reconService.ReadExternalCsv(services.ReconCsvDetail{
 		Source:      "dbs",
 		CsvFilepath: FILES["dbs"],
 		Parser:      parser.NewDbsParser(),
 	})
-	bcaTransactionChan := reconService.ReadExternalCsv(services.ReconCsvDetail{
+	if err != nil {
+		panic(err)
+	}
+
+	bcaTransactionChan, err := reconService.ReadExternalCsv(services.ReconCsvDetail{
 		Source:      "bca",
 		CsvFilepath: FILES["bca"],
 		Parser:      parser.NewBcaParser(),
 	})
+	if err != nil {
+		panic(err)
+	}
 
 	transactionChan := pipeline.CombineChans(internalTransactionChan, dbsTransactionChan, bcaTransactionChan)
 	transactionChan = pipeline.TransformChan(transactionChan, reconService.FilterByDate)
-	reconTransactionChan := reconService.Reconcile(transactionChan)
+	reconTransactionChan, err := reconService.Reconcile(transactionChan)
+	if err != nil {
+		panic(err)
+	}
+
 	reconTransactionChan = reconService.PassThroughSummary(reconTransactionChan, reconSummary)
 	mismatchedChan := reconService.FilterMismatched(reconTransactionChan)
-	reconService.WriteToCsv(FILES["output"], mismatchedChan)
+	err = reconService.WriteToCsv(FILES["output"], mismatchedChan)
+	if err != nil {
+		panic(err)
+	}
 
 	fmt.Println("====== Reconciliation Summary ======")
 	fmt.Printf("Total Matched Transactions: %d\n", reconSummary.TotalMatched)
