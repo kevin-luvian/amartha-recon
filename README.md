@@ -32,7 +32,7 @@ amartha-recon/
 │   │   ├── CsvIngester.go
 │   │   └── Types.go
 │   ├── pipeline/               # Data pipeline utilities
-│   │   ├── Pipeline.go
+│   │   └── Pipeline.go
 │   └── storage/                # Bespoke table implementation
 │       ├── HashTable.go
 │       ├── SearchTree.go
