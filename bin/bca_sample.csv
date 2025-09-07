@@ -1,3 +1,4 @@
 ext_id,amount,date
+bca_error_invalid_date_1,1,2025-01-0
 bca_match_amount_1,4,2025-01-02
-bca_match_amount_1,4,2025-01-05
+bca_match_amount_2,4,2025-01-05

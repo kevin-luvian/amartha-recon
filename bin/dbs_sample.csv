@@ -1,6 +1,6 @@
 ext_id,type,amount,date
 dbs_match_id_1,DEBIT,4,2025-01-01
 dbs_match_amount_1,DEBIT,10,2025-01-01
-dbs_error_negative_1,DEBIT,-10,2025-01-01
 dbs_match_date_3,DEBIT,14,2025-01-07
-dbs_match_date_2,DEBIT,12,2025-01-08
+dbs_error_negative_1,DEBIT,-10,2025-01-01
+dbs_no_match_date_1,DEBIT,12,2025-01-08

@@ -66,13 +66,14 @@ func main() {
 	}
 
 	reconTransactionChan = reconService.PassThroughSummary(reconTransactionChan, reconSummary)
-	mismatchedChan := reconService.FilterMismatched(reconTransactionChan)
+	mismatchedChan := pipeline.TransformChan(reconTransactionChan, reconService.FilterMismatched)
 	err = reconService.WriteToCsv(FILES["output"], mismatchedChan)
 	if err != nil {
 		panic(err)
 	}
 
 	fmt.Println("====== Reconciliation Summary ======")
+	fmt.Printf("Total Processed Transactions: %d\n", reconSummary.TotalMatched+reconSummary.TotalMismatched)
 	fmt.Printf("Total Matched Transactions: %d\n", reconSummary.TotalMatched)
 	fmt.Printf("Total Mismatched Transactions: %d\n", reconSummary.TotalMismatched)
 	fmt.Printf("Total Mismatches by Source:\n")

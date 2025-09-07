@@ -1,4 +1,5 @@
 source,id,type,amount,date,remark
+bca,bca_error_invalid_date_1,CREDIT,1.00,0001-01-01,"parsing time ""2025-01-0"" as ""2006-01-02"": cannot parse ""0"" as ""02"""
 dbs,dbs_error_negative_1,DEBIT,-10.00,2025-01-01,negative amount provided
-dbs,dbs_match_date_2,DEBIT,12.00,2025-01-08,No matching internal transaction found
+dbs,dbs_no_match_date_1,DEBIT,12.00,2025-01-08,No matching internal transaction found
 amartha,no_match_1,CREDIT,1.00,2025-10-05,No matching external transaction found

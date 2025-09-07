@@ -61,18 +61,6 @@ func TestReconService_Reconcile(t *testing.T) {
 					Date:      "2025-01-02",
 					DateEpoch: 1735689600000,
 				},
-				{
-					Id:        "txn_3",
-					Amount:    10,
-					Date:      "2025-01-03",
-					DateEpoch: 1735689600000,
-				},
-				{
-					Id:        "txn_4",
-					Amount:    10,
-					Date:      "2025-01-04",
-					DateEpoch: 1735689600000,
-				},
 			}
 			outChan := make(chan model.Transaction, len(txns)*2)
 			for _, txn := range txns {
@@ -85,14 +73,52 @@ func TestReconService_Reconcile(t *testing.T) {
 			return outChan
 		},
 		CheckExpected: func(rt []ReconTransaction) error {
-			if len(rt) != 4 {
-				return fmt.Errorf("Expected 4, got %d", len(rt))
+			if len(rt) != 2 {
+				return fmt.Errorf("Expected 2, got %d", len(rt))
 			}
 
 			for _, txn := range rt {
 				if !txn.IsMatched {
 					return fmt.Errorf("Expected matched, got %v", txn)
 				}
+			}
+
+			return nil
+		},
+	}, {
+		Label: "Success matched by id discrepancy amount",
+		Args: func() <-chan model.Transaction {
+			outChan := make(chan model.Transaction, 2)
+			outChan <- model.Transaction{
+				Source:    "internal",
+				Id:        "txn_1",
+				Amount:    10,
+				Date:      "2025-01-01",
+				DateEpoch: 1735689600000,
+			}
+			outChan <- model.Transaction{
+				Source:    "external",
+				Id:        "txn_1",
+				Amount:    1,
+				Date:      "2025-01-01",
+				DateEpoch: 1735689600000,
+			}
+			close(outChan)
+			return outChan
+		},
+		CheckExpected: func(rt []ReconTransaction) error {
+			if len(rt) != 1 {
+				return fmt.Errorf("Expected 1, got %d", len(rt))
+			}
+
+			txn := rt[0]
+			if !txn.IsMatched {
+				return fmt.Errorf("Expected matched, got %v", txn)
+			}
+
+			discrepancy := math.Abs(txn.Amount - txn.OtherTransaction.Amount)
+			if discrepancy != 9 {
+				return fmt.Errorf("Expected 9, got %.2f", discrepancy)
 			}
 
 			return nil
@@ -159,11 +185,6 @@ func TestReconService_Reconcile(t *testing.T) {
 			txn := rt[0]
 			if !txn.IsMatched {
 				return fmt.Errorf("Expected matched, got %v", txn)
-			}
-
-			discrepancy := math.Abs(txn.Amount - txn.OtherTransaction.Amount)
-			if discrepancy != 9 {
-				return fmt.Errorf("Expected 9, got %.2f", discrepancy)
 			}
 
 			return nil
@@ -466,5 +487,45 @@ func TestReconService_ReadExternalCsv(t *testing.T) {
 		if txn.Type != "one" {
 			t.Fatalf("Expected one, got %s", txn.Type)
 		}
+	}
+}
+
+func TestReconService_WriteToCsv(t *testing.T) {
+	// Create a temporary CSV file
+	ctx := context.Background()
+	dir := os.TempDir()
+	filePath := filepath.Join(dir, "test.csv")
+	defer os.Remove(filePath)
+
+	newService, _ := NewReconService(NewReconServiceOpts{
+		Ctx:         ctx,
+		CsvIngester: ingester.NewCsvIngester(),
+	})
+
+	txnChan := make(chan ReconTransaction, 1)
+	txnChan <- ReconTransaction{
+		Transaction: model.Transaction{
+			Source: "test",
+			Id:     "txn_1",
+			Date:   "2025-01-01",
+		},
+		Remark: "remarks",
+	}
+	close(txnChan)
+
+	err := newService.WriteToCsv(filePath, txnChan)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	b, err := os.ReadFile(filePath)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	csvStr := string(b)
+	expected := "source,id,type,amount,date,remark\ntest,txn_1,,0.00,2025-01-01,remarks\n"
+	if csvStr != expected {
+		t.Fatalf("Expected %s, got %s", expected, csvStr)
 	}
 }

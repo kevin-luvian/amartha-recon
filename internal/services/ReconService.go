@@ -34,18 +34,6 @@ type ReconTransaction struct {
 	Remark           string
 }
 
-func (rt ReconTransaction) ToMap() map[string]string {
-	return map[string]string{
-		"source":     rt.Source,
-		"id":         rt.Id,
-		"type":       rt.Type,
-		"amount":     fmt.Sprintf("%.2f", rt.Amount),
-		"date":       rt.Date,
-		"is_matched": fmt.Sprintf("%t", rt.IsMatched),
-		"remark":     rt.Remark,
-	}
-}
-
 type ReconCsvDetail struct {
 	Source      string
 	CsvFilepath string
@@ -141,7 +129,7 @@ func (r *ReconService) Reconcile(transactionChan <-chan model.Transaction) (<-ch
 	outChan := make(chan ReconTransaction, 10)
 
 	if r.internalSource == "" {
-		return outChan, fmt.Errorf("Internal source not set")
+		return outChan, fmt.Errorf("internal source not set")
 	}
 
 	go func() {
@@ -158,23 +146,19 @@ func (r *ReconService) Reconcile(transactionChan <-chan model.Transaction) (<-ch
 				continue
 			}
 
-			var reconTransaction ReconTransaction
-			var ok bool
 			if transaction.Source == r.internalSource {
 				r.internalTable.Put(transaction)
-				reconTransaction, ok = r.processInternalMatching(transaction)
-				if !ok {
-					continue
+				reconTransaction, ok := r.processInternalMatching(transaction)
+				if ok {
+					outChan <- reconTransaction
 				}
 			} else {
 				r.externalTable.Put(transaction)
-				reconTransaction, ok = r.processExternalMatching(transaction)
-				if !ok {
-					continue
+				reconTransaction, ok := r.processExternalMatching(transaction)
+				if ok {
+					outChan <- reconTransaction
 				}
 			}
-
-			outChan <- reconTransaction
 		}
 
 		for _, externalTransaction := range r.externalTable.Table {
@@ -279,15 +263,20 @@ func (r *ReconService) PassThroughSummary(reconTransactionChan <-chan ReconTrans
 	})
 }
 
-func (r *ReconService) FilterMismatched(reconTransactionChan <-chan ReconTransaction) <-chan ReconTransaction {
-	return pipeline.TransformChan(reconTransactionChan, func(t ReconTransaction) (ReconTransaction, bool) {
-		return t, !t.IsMatched
-	})
+func (r *ReconService) FilterMismatched(t ReconTransaction) (ReconTransaction, bool) {
+	return t, !t.IsMatched
 }
 
 func (r *ReconService) WriteToCsv(filepath string, reconTransactionChan <-chan ReconTransaction) error {
-	recordChan := pipeline.TransformChan(reconTransactionChan, func(t ReconTransaction) (map[string]string, bool) {
-		return t.ToMap(), true
+	recordChan := pipeline.TransformChan(reconTransactionChan, func(rt ReconTransaction) (map[string]string, bool) {
+		return map[string]string{
+			"source": rt.Source,
+			"id":     rt.Id,
+			"type":   rt.Type,
+			"amount": fmt.Sprintf("%.2f", rt.Amount),
+			"date":   rt.Date,
+			"remark": rt.Remark,
+		}, true
 	})
 
 	csvHeader := []string{"source", "id", "type", "amount", "date", "remark"}
