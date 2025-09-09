@@ -42,10 +42,10 @@ func (s *SearchTree[T]) GetChildValues() []T {
 		node := stack[len(stack)-1]
 		stack = stack[:len(stack)-1]
 
-		if node.Value != "" {
-			childValues = append(childValues, node.Value)
-		} else {
-			for _, c := range node.Children {
+		for _, c := range node.Children {
+			if c.Value != "" {
+				childValues = append(childValues, c.Value)
+			} else {
 				stack = append(stack, c)
 			}
 		}
@@ -80,40 +80,35 @@ func (s *SearchTree[T]) Get(keys []string) *Trie[T] {
 	node := &s.Root
 	var ok bool
 
-	for {
-		if len(keys) == 0 {
-			return node
-		}
-
-		node, ok = node.Children[keys[0]]
+	for _, key := range keys {
+		node, ok = node.Children[key]
 		if !ok {
 			return nil
 		}
-
-		keys = keys[1:]
 	}
+
+	return node
 }
 
 func (s *SearchTree[T]) Put(keys []string, value T) {
 	node := &s.Root
 	var ok bool
 
-	for {
-		if len(keys) == 0 {
-			node.Value = value
-			return
-		}
-
-		_, ok = node.Children[keys[0]]
+	for i, key := range keys {
+		_, ok = node.Children[key]
 		if !ok {
-			node.Children[keys[0]] = &Trie[T]{
+			node.Children[key] = &Trie[T]{
 				Children: make(map[string]*Trie[T]),
 				Value:    "",
 			}
 		}
 
-		node = node.Children[keys[0]]
-		keys = keys[1:]
+		node = node.Children[key]
+
+		if i == len(keys)-1 {
+			node.Value = value
+			return
+		}
 	}
 }
 
@@ -131,27 +126,24 @@ func (s *SearchTree[T]) Delete(keys []string) (bool, error) {
 		}
 	}
 
-	for {
-		if len(stack) == 0 || len(keys) == 0 {
-			return false, nil
-		}
+	if len(keys) == 0 || len(keys) < (len(stack)-1) {
+		return false, nil
+	}
 
-		node := stack[len(stack)-1]
-		stack = stack[:len(stack)-1]
-		key := keys[len(keys)-1]
-		keys = keys[:len(keys)-1]
+	for i := len(stack) - 1; i > 0; i-- {
+		node := stack[i]
+		key := keys[i-1]
 
 		if len(node.Children) > 0 {
 			return false, nil
 		}
 
-		if len(stack) > 0 {
-			node = stack[len(stack)-1]
-			delete(node.Children, key)
-		} else {
-			return false, nil
+		if i > 0 {
+			delete(stack[i-1].Children, key)
 		}
 	}
+
+	return false, nil
 }
 
 func (s *SearchTree[T]) GetPrint() string {
