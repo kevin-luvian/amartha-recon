@@ -111,8 +111,8 @@ func TestHashTable_Remove(t *testing.T) {
 		t.Fatalf("Expected 0, got %d", tableLength)
 	}
 
-	searchTreeLength := len(root.SearchTree.Children)
-	searchTreeValue := root.SearchTree.Value
+	searchTreeLength := len(root.SearchTree.Root.Children)
+	searchTreeValue := root.SearchTree.Root.Value
 	if searchTreeLength != 0 || searchTreeValue != "" {
 		t.Fatalf("Expected empty, got %v", root.SearchTree)
 	}
@@ -142,13 +142,14 @@ func TestHashTable_IsPathContainsOneValue(t *testing.T) {
 		root.Put(&obj)
 	}
 
-	foundObj, ok := root.IsPathContainsOneValue([]string{"test"})
+	foundId, ok := root.IsPathContainsOneValue([]string{"test"})
 	if !ok {
 		t.Fatalf("Expected true, got %v", ok)
 	}
 
-	if reflect.DeepEqual(foundObj, objects[0]) {
-		t.Fatalf("Expected object %v, got %v", objects[0], foundObj)
+	expectedId, _ := objects[0].Hash()
+	if foundId != expectedId {
+		t.Fatalf("Expected %v, got %v", expectedId, foundId)
 	}
 }
 
