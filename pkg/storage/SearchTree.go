@@ -76,6 +76,33 @@ func (s *SearchTree[T]) GetFirstChildValue(keys []string) T {
 	}
 }
 
+func (s *SearchTree[T]) IsPathContainsOneValue(path []string) (T, bool) {
+	node := s.Get(path)
+	var nodeKey T
+
+	if node == nil {
+		return "", false
+	}
+
+	for {
+		if len(node.Children) == 0 {
+			nodeKey = node.Value
+			break
+		}
+
+		if len(node.Children) > 1 {
+			break
+		}
+
+		for _, child := range node.Children {
+			node = child
+			break
+		}
+	}
+
+	return nodeKey, nodeKey != T("")
+}
+
 func (s *SearchTree[T]) Get(keys []string) *Trie[T] {
 	node := &s.Root
 	var ok bool

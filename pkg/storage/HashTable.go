@@ -48,31 +48,7 @@ func (h *HashTable) GetFirstMatchByPath(path []string) IHashable {
 }
 
 func (h *HashTable) IsPathContainsOneValue(path []string) (string, bool) {
-	node := h.SearchTree.Get(path)
-	nodeKey := ""
-
-	if node == nil {
-		return "", false
-	}
-
-	for {
-		if len(node.Children) == 0 {
-			nodeKey = node.Value
-			break
-		}
-
-		if len(node.Children) > 1 {
-			nodeKey = ""
-			break
-		}
-
-		for _, child := range node.Children {
-			node = child
-			break
-		}
-	}
-
-	return nodeKey, nodeKey != ""
+	return h.SearchTree.IsPathContainsOneValue(path)
 }
 
 func (h *HashTable) Put(obj IHashable) {
